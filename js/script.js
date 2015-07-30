@@ -14,6 +14,7 @@ $(document).one('pageinit', function(){
     
     // Show runs on homepage
     function showRuns(){
+    	
     	// Get runs object
     	var runs = getRunsObject();
     	
