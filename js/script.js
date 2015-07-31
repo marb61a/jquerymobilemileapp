@@ -2,35 +2,42 @@ $(document).one('pageinit', function(){
 	
 	// Display runs
 	showRuns();
-    
-    // Add Handler
+
+	// Add Handler
 	$('#submitAdd').on('tap', addRun);
 	
 	// Edit Handler
 	$('#submitEdit').on('tap', editRun);
 	
+	// Delete Handler
+	$('#stats').on('tap','#deleteLink', deleteRun);
+	
 	// Set Current Handler
 	$('#stats').on('tap','#editLink', setCurrent);
+	
+	// Clear Handler
+	$('#clearRuns').on('tap', clearRuns);
     
     // Show runs on homepage
     function showRuns(){
     	
-    	// Get runs object
-    	var runs = getRunsObject();
-    	
-    	// Check to see if empty
-    	if(runs != '' && runs != null){
-    		for(var i = 0; i < runs.length; i++){
-    			$('#stats').append('<li class="ui-body-inherit ui-li-static"><strong>Date:</strong>'+runs[i]["date"]+
+		// get runs object
+		var runs = getRunsObject();
+		
+		// Check if empty
+		if(runs != '' && runs != null){
+			for(var i = 0;i < runs.length;i++){
+				$('#stats').append('<li class="ui-body-inherit ui-li-static"><strong>Date:</strong>'+runs[i]["date"]+
 				' <br><strong>Distance: </strong>'+runs[i]["miles"]+'m<div class="controls">' +
-				'<a href="#edit">Edit</a> | <a href="#">Delete</a></li>');
-    		}
-    		
-    		$('#home').bind('pageinit', function(){
-    			$('#stats').listview('refresh');
-    		});
-    	}
-    }
+				'<a href="#edit" id="editLink" data-miles="'+runs[i]["miles"]+'" data-date="'+runs[i]["date"]+'">Edit</a> | <a href="#" id="deleteLink" data-miles="'+runs[i]["miles"]+'" data-date="'+runs[i]["date"]+'" onclick="return confirm(\'Are You Sure?\')">Delete</a></li>');
+			}
+			$('#home').bind('pageinit', function(){
+				$('#stats').listview('refresh');
+			});
+		} else {
+			$('#stats').html('<p>You have no logged runs</p>');
+		}
+	 }
     
     
     // Adds a run
@@ -103,6 +110,42 @@ $(document).one('pageinit', function(){
 		
 		return false;
     }
+    
+    
+    // Clears runs
+    function clearRuns(){
+		localStorage.removeItem('runs');
+		$('#stats').html('<p>You have no runs to delete</p>');
+	 }
+	 
+	
+	// Delete runs
+	function deleteRun(){
+		// Set ls items
+		localStorage.setItem('currentMiles', $(this).data('miles'));
+		localStorage.setItem('currentDate', $(this).data('date'));
+		
+		// Get current data
+		var currentMiles = localStorage.getItem('currentMiles');
+		var currentDate = localStorage.getItem('currentDate');
+		
+		var runs = getRunsObject();
+		
+		// Loop through runs
+		for(var i = 0;i < runs.length;i++){
+			if(runs[i].miles == currentMiles && runs[i].date == currentDate){
+				runs.splice(i,1);
+			}
+			localStorage.setItem('runs',JSON.stringify(runs));
+		}
+		
+		alert('Run Deleted');
+		
+		// Redirect
+		window.location.href="index.html";
+		
+		return false;
+	 }
     
     
     function getRunsObject(){
